@@ -1,7 +1,18 @@
+/**
+ * REST API client service for GamePulse Analytics Dashboard.
+ *
+ * Provides typed abstraction methods over backend FastAPI endpoints.
+ */
+
 const API_BASE = '/api';
 
 export const api = {
-  // Analytics
+  /**
+   * Fetch aggregated analytics metrics, KPI summaries, and chart time-series.
+   *
+   * @param {Object} params - Query parameters (startDate, endDate, category, platform, search)
+   * @returns {Promise<Object>} Aggregated analytics data payload
+   */
   async getAnalytics(params = {}) {
     const query = new URLSearchParams();
     if (params.startDate) query.append('start_date', params.startDate);
@@ -11,11 +22,19 @@ export const api = {
     if (params.search) query.append('search', params.search);
 
     const res = await fetch(`${API_BASE}/analytics?${query.toString()}`);
-    if (!res.ok) throw new Error('Failed to fetch analytics');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to fetch analytics' }));
+      throw new Error(err.detail || 'Failed to fetch analytics metrics');
+    }
     return res.json();
   },
 
-  // Activities
+  /**
+   * Fetch paginated and filtered activity records.
+   *
+   * @param {Object} params - Query parameters (skip, limit, search, category, platform, startDate, endDate)
+   * @returns {Promise<Object>} Paginated records and total count
+   */
   async getActivities(params = {}) {
     const query = new URLSearchParams({
       skip: params.skip || 0,
@@ -28,10 +47,19 @@ export const api = {
     if (params.endDate) query.append('end_date', params.endDate);
 
     const res = await fetch(`${API_BASE}/activities?${query.toString()}`);
-    if (!res.ok) throw new Error('Failed to fetch activities');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to fetch activities' }));
+      throw new Error(err.detail || 'Failed to fetch activity records');
+    }
     return res.json();
   },
 
+  /**
+   * Create a new activity session or expenditure record.
+   *
+   * @param {Object} activity - Activity payload matching ActivityCreate schema
+   * @returns {Promise<Object>} Created activity entity
+   */
   async createActivity(activity) {
     const res = await fetch(`${API_BASE}/activities`, {
       method: 'POST',
@@ -40,28 +68,50 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: 'Failed to create' }));
-      throw new Error(err.detail || 'Failed to create activity');
+      throw new Error(err.detail || 'Failed to create activity record');
     }
     return res.json();
   },
 
+  /**
+   * Delete a single activity record by its primary key.
+   *
+   * @param {number} id - Activity primary key
+   * @returns {Promise<Object>} Deletion status confirmation
+   */
   async deleteActivity(id) {
     const res = await fetch(`${API_BASE}/activities/${id}`, {
       method: 'DELETE'
     });
-    if (!res.ok) throw new Error('Failed to delete activity');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to delete' }));
+      throw new Error(err.detail || 'Failed to delete activity record');
+    }
     return res.json();
   },
 
+  /**
+   * Truncate and purge all activity records in database.
+   *
+   * @returns {Promise<Object>} Deletion result summary
+   */
   async deleteAllActivities() {
     const res = await fetch(`${API_BASE}/activities`, {
       method: 'DELETE'
     });
-    if (!res.ok) throw new Error('Failed to clear data');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to clear data' }));
+      throw new Error(err.detail || 'Failed to clear activity data');
+    }
     return res.json();
   },
 
-  // File Upload
+  /**
+   * Upload and ingest a CSV or JSON dataset file.
+   *
+   * @param {File} file - CSV or JSON file instance
+   * @returns {Promise<Object>} Ingestion batch summary
+   */
   async uploadFile(file) {
     const formData = new FormData();
     formData.append('file', file);
@@ -77,7 +127,11 @@ export const api = {
     return res.json();
   },
 
-  // Load bundled demo dataset
+  /**
+   * Seed the database with the bundled multi-month demo dataset.
+   *
+   * @returns {Promise<Object>} Ingestion confirmation
+   */
   async loadSampleData() {
     const res = await fetch(`${API_BASE}/upload/load-sample`, {
       method: 'POST'

@@ -1,14 +1,24 @@
 import React from 'react';
-import { Clock, Wallet, Trophy, Tag, Calendar, Gamepad } from 'lucide-react';
+import { Clock, Wallet, Trophy, Tag, Gamepad } from 'lucide-react';
 
+/**
+ * Top-level KPI metric cards.
+ *
+ * Displays aggregated statistical indicators:
+ * - Total Gameplay Hours & 24h day equivalent
+ * - Total Expenditure & unit cost per hour ($/hr)
+ * - Top Played Title by hours
+ * - Primary Genre / Category by playtime
+ * - Distinct Games Count & Total Sessions
+ */
 export default function KpiCards({ kpis }) {
   if (!kpis) return null;
 
   const cards = [
     {
-      title: 'Всего времени',
-      value: `${kpis.total_hours.toFixed(1)} ч.`,
-      subtext: `${(kpis.total_hours / 24).toFixed(1)} дн. чистого геймплея`,
+      title: 'Total Playtime',
+      value: `${kpis.total_hours.toFixed(1)} hrs`,
+      subtext: `${(kpis.total_hours / 24).toFixed(1)} pure days of gaming`,
       icon: Clock,
       color: 'from-blue-500 to-cyan-500',
       bgColor: 'bg-blue-500/10',
@@ -16,9 +26,9 @@ export default function KpiCards({ kpis }) {
       textColor: 'text-blue-400'
     },
     {
-      title: 'Всего расходов',
+      title: 'Total Spending',
       value: `$${kpis.total_spent.toFixed(2)}`,
-      subtext: `$${kpis.avg_cost_per_hour.toFixed(2)} / час игры`,
+      subtext: `$${kpis.avg_cost_per_hour.toFixed(2)} / gameplay hour`,
       icon: Wallet,
       color: 'from-emerald-500 to-teal-500',
       bgColor: 'bg-emerald-500/10',
@@ -26,9 +36,9 @@ export default function KpiCards({ kpis }) {
       textColor: 'text-emerald-400'
     },
     {
-      title: 'Топ игра',
-      value: kpis.top_game || 'Нет данных',
-      subtext: 'По суммарным часам',
+      title: 'Top Game',
+      value: kpis.top_game || 'No Data',
+      subtext: 'By cumulative hours',
       icon: Trophy,
       color: 'from-amber-500 to-orange-500',
       bgColor: 'bg-amber-500/10',
@@ -36,9 +46,9 @@ export default function KpiCards({ kpis }) {
       textColor: 'text-amber-400'
     },
     {
-      title: 'Любимый жанр',
-      value: kpis.top_category || 'Нет данных',
-      subtext: 'Наибольшая активность',
+      title: 'Favorite Genre',
+      value: kpis.top_category || 'No Data',
+      subtext: 'Highest playtime share',
       icon: Tag,
       color: 'from-purple-500 to-pink-500',
       bgColor: 'bg-purple-500/10',
@@ -46,9 +56,9 @@ export default function KpiCards({ kpis }) {
       textColor: 'text-purple-400'
     },
     {
-      title: 'Игр и сессий',
-      value: `${kpis.unique_games} игр`,
-      subtext: `${kpis.total_activities} сессий за ${kpis.total_days_active} дн.`,
+      title: 'Catalog & Activity',
+      value: `${kpis.unique_games} games`,
+      subtext: `${kpis.total_activities} sessions across ${kpis.total_days_active} days`,
       icon: Gamepad,
       color: 'from-indigo-500 to-violet-500',
       bgColor: 'bg-indigo-500/10',

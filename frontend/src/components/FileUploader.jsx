@@ -1,6 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, FileText, CheckCircle2, AlertCircle, X, Sparkles } from 'lucide-react';
 
+/**
+ * Dataset Ingestion Modal.
+ *
+ * Supports drag-and-drop or file picker for .csv and .json files.
+ * Includes schema mapping hints and one-click demo data population.
+ */
 export default function FileUploader({ isOpen, onClose, onUploadSuccess, onLoadSample }) {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -41,7 +47,7 @@ export default function FileUploader({ isOpen, onClose, onUploadSuccess, onLoadS
     setSuccessMsg(null);
     const ext = file.name.split('.').pop().toLowerCase();
     if (ext !== 'csv' && ext !== 'json') {
-      setError('Поддерживаются только файлы форматов .csv и .json');
+      setError('Unsupported file type. Only .csv and .json files are accepted.');
       return;
     }
     setSelectedFile(file);
@@ -53,13 +59,13 @@ export default function FileUploader({ isOpen, onClose, onUploadSuccess, onLoadS
     setError(null);
     try {
       await onUploadSuccess(selectedFile);
-      setSuccessMsg(`Файл ${selectedFile.name} успешно загружен и обработан!`);
+      setSuccessMsg(`File "${selectedFile.name}" successfully imported!`);
       setSelectedFile(null);
       setTimeout(() => {
         onClose();
       }, 1200);
     } catch (err) {
-      setError(err.message || 'Ошибка загрузки файла');
+      setError(err.message || 'File upload failed');
     } finally {
       setUploading(false);
     }
@@ -68,7 +74,7 @@ export default function FileUploader({ isOpen, onClose, onUploadSuccess, onLoadS
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
       <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative">
-        {/* Close Button */}
+        {/* Dismiss Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
@@ -81,8 +87,8 @@ export default function FileUploader({ isOpen, onClose, onUploadSuccess, onLoadS
             <UploadCloud className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Загрузка данных активности</h3>
-            <p className="text-xs text-slate-400">Импорт истории игр из CSV или JSON файла</p>
+            <h3 className="text-lg font-bold text-white">Import Activity Data</h3>
+            <p className="text-xs text-slate-400">Ingest gaming sessions from CSV or JSON files</p>
           </div>
         </div>
 
@@ -100,7 +106,7 @@ export default function FileUploader({ isOpen, onClose, onUploadSuccess, onLoadS
           </div>
         )}
 
-        {/* Drag & Drop Area */}
+        {/* Drag & Drop Target Area */}
         <div
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -123,31 +129,31 @@ export default function FileUploader({ isOpen, onClose, onUploadSuccess, onLoadS
 
           <UploadCloud className="w-10 h-10 text-slate-400 mx-auto mb-2" />
           <p className="text-sm font-medium text-slate-200">
-            Перетащите сюда файл или <span className="text-purple-400 underline">выберите с диска</span>
+            Drag and drop your file here, or <span className="text-purple-400 underline">browse files</span>
           </p>
-          <p className="text-xs text-slate-500 mt-1">Поддерживаются .CSV и .JSON (до 15 МБ)</p>
+          <p className="text-xs text-slate-500 mt-1">Supports standard .CSV and .JSON formats (up to 15 MB)</p>
 
           {selectedFile && (
             <div className="mt-4 p-3 bg-purple-950/40 border border-purple-800/60 rounded-xl inline-flex items-center space-x-2 text-xs text-purple-200">
               <FileText className="w-4 h-4 text-purple-400" />
               <span className="font-semibold">{selectedFile.name}</span>
-              <span className="text-slate-400">({(selectedFile.size / 1024).toFixed(1)} КБ)</span>
+              <span className="text-slate-400">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
             </div>
           )}
         </div>
 
-        {/* Schema Guide info */}
+        {/* Data Schema Mapping Notice */}
         <div className="mt-4 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-xs text-slate-400 space-y-1">
-          <p className="font-semibold text-slate-300">Ожидаемые поля:</p>
+          <p className="font-semibold text-slate-300">Expected Column Headers:</p>
           <p className="font-mono text-[11px] text-slate-300">
             title, category, platform, date, hours_played, money_spent, rating, notes
           </p>
           <p className="text-[11px] text-slate-500">
-            * Приложение автоматически сопоставляет синонимы (game, genre, hours, cost, price).
+            * Header aliases (e.g. game, genre, hours, cost, price) are automatically detected and mapped.
           </p>
         </div>
 
-        {/* Action Buttons */}
+        {/* Controls */}
         <div className="mt-6 flex items-center justify-between">
           <button
             onClick={() => {
@@ -157,7 +163,7 @@ export default function FileUploader({ isOpen, onClose, onUploadSuccess, onLoadS
             className="inline-flex items-center text-xs text-indigo-400 hover:text-indigo-300 transition"
           >
             <Sparkles className="w-3.5 h-3.5 mr-1" />
-            Загрузить готовый демо-датасет
+            Load Sample Demo Dataset
           </button>
 
           <div className="flex items-center space-x-2">
@@ -165,14 +171,14 @@ export default function FileUploader({ isOpen, onClose, onUploadSuccess, onLoadS
               onClick={onClose}
               className="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white rounded-xl transition"
             >
-              Отмена
+              Cancel
             </button>
             <button
               onClick={handleUpload}
               disabled={!selectedFile || uploading}
               className="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-40 rounded-xl shadow-lg shadow-purple-600/20 transition"
             >
-              {uploading ? 'Импорт...' : 'Импортировать'}
+              {uploading ? 'Importing...' : 'Import Dataset'}
             </button>
           </div>
         </div>

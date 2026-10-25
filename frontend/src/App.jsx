@@ -9,6 +9,14 @@ import AddActivityModal from './components/AddActivityModal';
 import { api } from './services/api';
 import { RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 
+/**
+ * GamePulse Core Dashboard View.
+ *
+ * Manages synchronized analytical state across:
+ * - High-level aggregated statistics (KPIs, time-series, categories, platforms)
+ * - Paginated activity record sets
+ * - Real-time filtering parameters (search keyword, genre, platform, date boundaries)
+ */
 export default function App() {
   const [analytics, setAnalytics] = useState(null);
   const [activitiesData, setActivitiesData] = useState({ items: [], total: 0, skip: 0, limit: 15 });
@@ -33,7 +41,10 @@ export default function App() {
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Fetch Dashboard Data
+  /**
+   * Primary asynchronous state synchronization.
+   * Fetches analytics and activities concurrently using Promise.all.
+   */
   const loadData = useCallback(async (currentFilters = filters, skip = 0) => {
     try {
       setLoading(true);
@@ -44,7 +55,7 @@ export default function App() {
       setAnalytics(analyticsRes);
       setActivitiesData(activitiesRes);
     } catch (err) {
-      showToast(err.message || 'Ошибка загрузки данных', 'error');
+      showToast(err.message || 'Error synchronizing dashboard metrics', 'error');
     } finally {
       setLoading(false);
     }
@@ -85,7 +96,7 @@ export default function App() {
       showToast(res.message);
       loadData(filters, 0);
     } catch (err) {
-      showToast(err.message || 'Не удалось загрузить демо-данные', 'error');
+      showToast(err.message || 'Failed to load sample dataset', 'error');
     } finally {
       setIsLoadingSample(false);
     }
@@ -93,15 +104,15 @@ export default function App() {
 
   const handleAddActivity = async (activityData) => {
     await api.createActivity(activityData);
-    showToast('Активность успешно сохранена!');
+    showToast('Activity record successfully created!');
     loadData(filters, 0);
   };
 
   const handleDeleteActivity = async (id) => {
-    if (!window.confirm('Удалить эту запись?')) return;
+    if (!window.confirm('Are you sure you want to delete this activity record?')) return;
     try {
       await api.deleteActivity(id);
-      showToast('Запись удалена');
+      showToast('Record deleted');
       loadData(filters, activitiesData.skip);
     } catch (err) {
       showToast(err.message, 'error');
@@ -109,7 +120,7 @@ export default function App() {
   };
 
   const handleClearAll = async () => {
-    if (!window.confirm('Вы уверены, что хотите удалить ВСЕ записи? Это действие необратимо.')) return;
+    if (!window.confirm('Are you sure you want to permanently clear ALL stored activity records?')) return;
     try {
       setIsClearing(true);
       const res = await api.deleteAllActivities();
@@ -124,10 +135,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
-      {/* Toast Notification */}
+      {/* Toast Notification Alert */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 text-sm border backdrop-blur-md animate-bounce-once ${
+          role="status"
+          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 text-sm border backdrop-blur-md animate-fade-in ${
             toast.type === 'error'
               ? 'bg-red-950/90 border-red-800 text-red-200'
               : 'bg-emerald-950/90 border-emerald-800 text-emerald-200'
@@ -142,7 +154,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Navbar */}
+      {/* Primary Navigation Header */}
       <Navbar
         onOpenUpload={() => setIsUploadOpen(true)}
         onOpenAdd={() => setIsAddOpen(true)}
@@ -152,12 +164,12 @@ export default function App() {
         isLoadingSample={isLoadingSample}
       />
 
-      {/* Main Content Area */}
+      {/* Main Analytical Grid */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* KPI Summary Cards */}
+        {/* Aggregated KPI Cards */}
         {analytics && <KpiCards kpis={analytics.kpis} />}
 
-        {/* Filters and Search Bar */}
+        {/* Dynamic Filters Toolbar */}
         {analytics && (
           <FiltersBar
             filters={filters}
@@ -168,18 +180,18 @@ export default function App() {
           />
         )}
 
-        {/* Loading Spinner */}
+        {/* Dynamic Activity Refresh Indicator */}
         {loading && (
           <div className="flex items-center justify-center py-6 space-x-2 text-sm text-purple-400">
             <RefreshCw className="w-4 h-4 animate-spin" />
-            <span>Обновление аналитики...</span>
+            <span>Calculating metrics & time-series...</span>
           </div>
         )}
 
-        {/* Charts Section */}
+        {/* Visual Charts Section */}
         {analytics && <ChartsSection analytics={analytics} />}
 
-        {/* Activity Table */}
+        {/* Paginated Activity Journal Table */}
         <ActivityTable
           activities={activitiesData.items}
           total={activitiesData.total}
@@ -190,15 +202,15 @@ export default function App() {
         />
       </main>
 
-      {/* Footer */}
+      {/* Global Application Footer */}
       <footer className="border-t border-slate-900 bg-slate-950/60 py-6 text-center text-xs text-slate-500">
         <p>
-          Gaming & Activity Personal Analytics Dashboard • Построено на{' '}
-          <span className="text-slate-400">FastAPI, pandas, PostgreSQL/SQLite, React & Chart.js</span>
+          GamePulse Personal Analytics • Engineered with{' '}
+          <span className="text-slate-400 font-medium">FastAPI, pandas, PostgreSQL/SQLite, React 18 & Chart.js</span>
         </p>
       </footer>
 
-      {/* Modals */}
+      {/* Overlay Modals */}
       <FileUploader
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}

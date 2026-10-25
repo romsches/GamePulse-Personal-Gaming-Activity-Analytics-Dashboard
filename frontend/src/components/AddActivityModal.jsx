@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { PlusCircle, X, AlertCircle } from 'lucide-react';
 
+/**
+ * Manual Activity Creation Modal.
+ *
+ * Allows users to register standalone play sessions, DLC expansions, or hardware/game purchases.
+ */
 export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
   const [formData, setFormData] = useState({
     title: '',
@@ -20,7 +25,7 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      setError('Укажите название игры');
+      setError('Title cannot be empty');
       return;
     }
     setSubmitting(true);
@@ -34,7 +39,7 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
       });
       onClose();
     } catch (err) {
-      setError(err.message || 'Ошибка сохранения');
+      setError(err.message || 'Failed to save activity record');
     } finally {
       setSubmitting(false);
     }
@@ -55,8 +60,8 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
             <PlusCircle className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Новая игровая активность</h3>
-            <p className="text-xs text-slate-400">Добавить игровую сессию или покупку</p>
+            <h3 className="text-lg font-bold text-white">New Activity Entry</h3>
+            <p className="text-xs text-slate-400">Log a gaming session, achievement, or purchase</p>
           </div>
         </div>
 
@@ -70,12 +75,12 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Название игры *
+              Game / Activity Title *
             </label>
             <input
               type="text"
               required
-              placeholder="например, Cyberpunk 2077"
+              placeholder="e.g. Cyberpunk 2077"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -85,7 +90,7 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Жанр / Категория *
+                Genre / Category *
               </label>
               <input
                 type="text"
@@ -99,7 +104,7 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Платформа *
+                Hardware Platform *
               </label>
               <select
                 value={formData.platform}
@@ -111,7 +116,7 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
                 <option value="Xbox Series X">Xbox Series X</option>
                 <option value="Nintendo Switch">Nintendo Switch</option>
                 <option value="Mobile">Mobile (iOS / Android)</option>
-                <option value="Other">Другое</option>
+                <option value="Other">Other</option>
               </select>
             </div>
           </div>
@@ -119,7 +124,7 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Дата *
+                Date *
               </label>
               <input
                 type="date"
@@ -132,7 +137,7 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Часов (h) *
+                Duration (hours) *
               </label>
               <input
                 type="number"
@@ -148,7 +153,7 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Расходы ($)
+                Cost ($)
               </label>
               <input
                 type="number"
@@ -163,7 +168,7 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Оценка (1.0 - 10.0)
+              Score Rating (1.0 - 10.0)
             </label>
             <input
               type="number"
@@ -172,18 +177,18 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
               max="10"
               value={formData.rating || ''}
               onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
-              placeholder="например, 9.5"
+              placeholder="e.g. 9.5"
               className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Заметки / Достижения
+              Notes & Highlights
             </label>
             <textarea
               rows="2"
-              placeholder="Что запомнилось, прогресс, боссы..."
+              placeholder="Boss defeated, quest progression, memorable moments..."
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
@@ -196,14 +201,14 @@ export default function AddActivityModal({ isOpen, onClose, onAddActivity }) {
               onClick={onClose}
               className="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white rounded-xl transition"
             >
-              Отмена
+              Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
               className="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-40 rounded-xl shadow-lg shadow-purple-600/20 transition"
             >
-              {submitting ? 'Сохранение...' : 'Добавить запись'}
+              {submitting ? 'Saving...' : 'Add Session'}
             </button>
           </div>
         </form>

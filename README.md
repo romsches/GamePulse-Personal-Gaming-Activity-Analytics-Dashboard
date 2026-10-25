@@ -1,181 +1,260 @@
-# 📊 GamePulse — Gaming & Activity Personal Analytics Dashboard
+# 📊 GamePulse — Personal Gaming & Activity Analytics Dashboard
 
-> Полнофункциональный веб-сервис для анализа личной игровой активности, времени и расходов с интерактивными графиками, загрузкой CSV/JSON, аналитикой на pandas и базой данных PostgreSQL / SQLite.
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![pandas](https://img.shields.io/badge/pandas-2.2+-150458?style=for-the-badge&logo=pandas&logoColor=white)](https://pandas.pydata.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![React](https://img.shields.io/badge/React-18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev)
+[![Chart.js](https://img.shields.io/badge/Chart.js-4.4+-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Docker](https://img.shields.io/badge/Docker-Desktop_Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-![Stack](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Stack](https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
-![Stack](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![Stack](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Stack](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)
-![Stack](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Stack](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-
----
-
-## 🎯 О проекте
-
-**GamePulse** — это аналитический дашборд разработчика/геймера. Пользователь загружает файлы истории игр (CSV или JSON), а приложение моментально рассчитывает ключевые KPI, строит визуализации и предоставляет фильтрацию по жанрам, платформам и временным диапазонам.
-
-### ✨ Ключевые возможности:
-1. **Загрузка и парсинг файлов (CSV / JSON)**:
-   - Интеллектуальное сопоставление колонок (поддерживает синонимы: `game`/`title`, `genre`/`category`, `cost`/`money_spent` и т.д.).
-   - Автоматическая валидация типов, дат и пустых значений через **pandas** и **Pydantic**.
-   - Возможность загрузить встроенный реалистичный демо-датасет в 1 клик.
-2. **Аналитические метрики и KPI**:
-   - Суммарное время в часах и днях чистого геймплея.
-   - Финансовые расходы и метрика **стоимости часа развлечений** ($/час).
-   - Топ игра по наигранному времени.
-   - Любимый жанр / категория.
-   - Количество уникальных игр и активных дней.
-3. **Интерактивные графики (Chart.js)**:
-   - **Динамика по месяцам**: комбинированный график (Bar: часы геймплея + Line: динамика расходов в $).
-   - **Категории и жанры**: Donut-диаграмма с долями процентов.
-   - **Рейтинг Топ-10 игр**: горизонтальный Bar Chart.
-   - **Платформы**: распределение между PC, PlayStation, Xbox, Switch и др.
-4. **Фильтрация и поиск в реальном времени**:
-   - Полнотекстовый поиск по названию игры.
-   - Фильтры по жанрам и платформам.
-   - Выбор диапазона дат и быстрые пресеты ("30 дней", "90 дней", "Все время").
-   - Все графики и KPI мгновенно пересчитываются под выбранные фильтры!
-5. **Журнал активности (Таблица)**:
-   - Сортировка, пагинация, бейджи жанров, система оценок (звезды 1.0–10.0), заметки.
-   - Ручное добавление новых сессий через модальное окно и удаление записей.
+> **GamePulse** is an end-to-end data intelligence and personal analytics platform. It ingests gaming and personal activity logs (CSV/JSON), processes vectorized metrics and monthly time-series using **pandas** and **SQLAlchemy**, and visualizes them on a sleek, reactive dashboard with **Chart.js** and **Tailwind CSS**.
 
 ---
 
-## 🏗️ Архитектура и стек технологий
+## 🏛️ System Architecture
 
 ```
-gaming-activity-dashboard/
-├── backend/
-│   ├── app/
-│   │   ├── main.py            # FastAPI инициализация, CORS, lifespan
-│   │   ├── config.py          # Pydantic Settings
-│   │   ├── database.py        # SQLAlchemy Engine & Session
-│   │   ├── models.py          # ORM модели (Activity, ImportBatch)
-│   │   ├── schemas.py         # Pydantic v2 схемы валидации и DTO
-│   │   ├── crud.py            # Операции с базой данных
-│   │   ├── analytics.py       # Аналитический движок на pandas + SQL
-│   │   ├── routers/           # Модульные эндпоинты (activities, analytics, upload)
-│   │   └── sample_data/       # Готовые CSV и JSON датасеты
-│   ├── tests/                 # Автотесты (pytest + TestClient)
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/
-│   ├── src/
-│   │   ├── components/        # UI-компоненты (Navbar, KpiCards, FiltersBar, Charts, Table, Modals)
-│   │   ├── services/api.js    # API-клиент
-│   │   ├── App.jsx            # Корневой компонент состояния
-│   │   └── index.css          # Стили Tailwind CSS и Dark Glass UI
-│   ├── nginx.conf             # Продакшн reverse proxy для Docker
-│   ├── package.json
-│   ├── vite.config.js
-│   └── Dockerfile
-├── docker-compose.yml         # Оркестрация: PostgreSQL 16 + FastAPI + Frontend/Nginx
-├── .env.example
-└── README.md
+                                  ┌────────────────────────┐
+                                  │      Client Web UI     │
+                                  │ (React 18 + Chart.js)  │
+                                  └───────────┬────────────┘
+                                              │ Port :3000 / :5173
+                                              ▼
+                                  ┌────────────────────────┐
+                                  │   Reverse Proxy / API  │
+                                  │     (Nginx / Vite)     │
+                                  └───────────┬────────────┘
+                                              │ HTTP /api/*
+                                              ▼
+                                  ┌────────────────────────┐
+                                  │    FastAPI Backend     │
+                                  │  (Pydantic v2 + Uvicorn│
+                                  └──────┬──────────┬──────┘
+                                         │          │
+                 Vectorized Aggregations │          │ Queries & CRUD
+                                         ▼          ▼
+                                   ┌──────────┐ ┌──────────────┐
+                                   │  pandas  │ │  SQLAlchemy  │
+                                   │  Engine  │ │  ORM Engine  │
+                                   └──────────┘ └──────┬───────┘
+                                                       │
+                                        ┌──────────────┴──────────────┐
+                                        ▼                             ▼
+                                ┌───────────────┐             ┌───────────────┐
+                                │ PostgreSQL 16 │  (or local) │ SQLite 3 (Dev)│
+                                │  (Production) │             │  (Zero-config)│
+                                └───────────────┘             └───────────────┘
 ```
 
-| Уровень | Технологии | Назначение |
+---
+
+## 🌟 Key Capabilities
+
+### 1. Robust File Ingestion & Intelligent Column Mapping
+- **Formats**: Drag-and-drop ingestion of standard `.csv` and `.json` files (up to 15 MB).
+- **Fuzzy Header Normalization**: Automatically normalizes synonyms without user intervention:
+  - `game`, `name`, `game_title` $\rightarrow$ `title`
+  - `genre`, `type` $\rightarrow$ `category`
+  - `hours`, `time_spent`, `duration` $\rightarrow$ `hours_played`
+  - `cost`, `spent`, `price` $\rightarrow$ `money_spent`
+  - `device`, `system` $\rightarrow$ `platform`
+- **Validation**: Strict schema verification, automated timestamp coercion, and null-value remediation via pandas.
+- **One-Click Demo Population**: Built-in button to populate the dashboard with realistic multi-month sample data.
+
+### 2. High-Performance Vectorized Analytics
+- **Entertainment Efficiency**: Calculates aggregate cost per hour (`total_spent / total_hours`), quantifying personal ROI on entertainment.
+- **Monthly Time-Series Dynamics**: Dual-axis bar and line aggregation tracking hours played vs. monthly expenditure.
+- **Genre & Platform Share**: Vectorized percentage distribution computation across game categories and hardware platforms (PC, PS5, Xbox, Switch, Mobile).
+- **Top 10 Ranking**: Top-performing titles ranked by cumulative gameplay duration.
+
+### 3. Multi-Dimensional Real-Time Filtering
+- Dynamic title search, category filter, platform filter, and custom date boundaries.
+- Quick presets: **All Time**, **30 Days**, **90 Days**, and **6 Months**.
+- Instant re-aggregation: All KPI summary cards and Chart.js visualizations recalculate dynamically without page reload.
+
+### 4. Dual-Mode Storage Architecture
+- **Production/Docker**: PostgreSQL 16 with pre-ping connection pooling and persistent volume mapping.
+- **Local Dev / Testing**: Zero-configuration SQLite fallback, allowing immediate standalone execution without external dependencies.
+
+---
+
+## 🖥️ Running via Docker Desktop (One-Click GUI Experience)
+
+This project is tailored specifically for **Docker Desktop**. You do **not** need to run continuous terminal commands to use the application.
+
+### Initial 1-Click Setup:
+Double-click the included launcher script in the project root:
+```
+Launch-Docker.bat
+```
+This script ensures Docker Desktop is running, registers the container group, and automatically opens the dashboard in your default browser.
+
+---
+
+### Managing Directly Inside Docker Desktop:
+
+Once launched, the project permanently appears in the **Docker Desktop GUI**:
+
+1. Open **Docker Desktop**.
+2. Click on the **Containers** tab in the left sidebar.
+3. Locate the container group named **`gamepulse-analytics`**:
+
+| Container | Image / Role | Port Link in Docker Desktop |
 | :--- | :--- | :--- |
-| **Backend** | Python 3.11, FastAPI, SQLAlchemy 2.0 | Высокопроизводительный асинхронный REST API |
-| **Data Engine** | pandas, NumPy | Быстрая агрегация временных рядов, группировка, KPI |
-| **Database** | PostgreSQL 16 (Docker) / SQLite (локально) | Надежное реляционное хранение данных |
-| **Frontend** | React 18, Vite, Tailwind CSS | Реактивный пользовательский интерфейс в Dark Mode |
-| **Визуализация** | Chart.js, react-chartjs-2, Lucide Icons | Анимированные интерактивные диаграммы |
-| **DevOps** | Docker, Docker Compose, Nginx | Контейнеризация и запуск одной командой |
-| **Тестирование**| pytest, TestClient | Комплексные автотесты бизнес-логики и API |
+| **`gamepulse-frontend`** | React 18 + Nginx Web Dashboard | Click **`3000:80`** $\rightarrow$ opens [http://localhost:3000](http://localhost:3000) |
+| **`gamepulse-backend`** | FastAPI REST Analytics API | Click **`8000:8000`** $\rightarrow$ opens [http://localhost:8000/docs](http://localhost:8000/docs) |
+| **`gamepulse-db`** | PostgreSQL 16 Alpine Database | Port `5432:5432` (Health-monitored) |
+
+4. **Starting / Stopping**:
+   - Click the green **Play (▶️)** button next to `gamepulse-analytics` to start all services.
+   - Click the port link **`3000:80`** right inside Docker Desktop to launch the Web UI in your browser.
+   - Click the square **Stop (⏹️)** button to pause the application whenever you are done.
 
 ---
 
-## 🚀 Быстрый запуск
+## 💻 Local Development Setup (Without Docker)
 
-### Вариант 1: Запуск через Docker Compose (Рекомендуется)
+If you prefer to run the codebase locally using Python and Node.js:
 
-Требуется установленный [Docker Desktop](https://www.docker.com/).
+### Prerequisites:
+- Python 3.11+
+- Node.js 18+ & npm
 
-```bash
-# 1. Склонируйте или перейдите в папку проекта:
-cd gaming-activity-dashboard
-
-# 2. Запустите все сервисы (PostgreSQL + Backend + Frontend):
-docker compose up --build
-```
-
-После старта перейдите в браузере:
-- 🌐 **Frontend (Дашборд):** [http://localhost:3000](http://localhost:3000)
-- 📚 **Swagger API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
-- 📖 **ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
-
----
-
-### Вариант 2: Локальный запуск для разработки (Без Docker)
-
-Проект настроен так, что при локальном запуске автоматически использует локальную базу данных SQLite — **никакой сторонней настройки СУБД не требуется**!
-
-#### 1. Запуск Backend:
+### 1. Backend Setup:
 ```bash
 cd backend
 
-# Создайте и активируйте виртуальное окружение:
+# Create and activate virtual environment
 python -m venv venv
+.\venv\Scripts\activate       # On Windows (PowerShell/CMD)
+# source venv/bin/activate    # On Linux/macOS
 
-# Windows (PowerShell / CMD):
-.\venv\Scripts\activate
-
-# Linux / macOS:
-source venv/bin/activate
-
-# Установите зависимости:
+# Install dependencies
 pip install -r requirements.txt
 
-# Запустите сервер FastAPI:
+# Start FastAPI development server
 uvicorn app.main:app --reload --port 8000
 ```
-*Backend будет доступен по адресу:* `http://localhost:8000` (Документация: `http://localhost:8000/docs`).
+*API & Interactive Documentation will be available at:* [http://localhost:8000/docs](http://localhost:8000/docs).
 
-#### 2. Запуск Frontend:
-В отдельном окне терминала:
+### 2. Frontend Setup:
+In a separate terminal:
 ```bash
 cd frontend
 
-# Установите зависимости:
+# Install npm packages
 npm install
 
-# Запустите dev-сервер:
+# Start Vite dev server
 npm run dev
 ```
-*Frontend будет доступен по адресу:* `http://localhost:5173`.
+*Web Dashboard will be available at:* [http://localhost:5173](http://localhost:5173).
 
 ---
 
-## 🧪 Запуск тестов
+## 🧪 Automated Testing Suite
 
-В проекте написаны автотесты, проверяющие эндпоинты, математику аналитики pandas, загрузку файлов и CRUD:
+The backend includes a comprehensive `pytest` test suite verifying health probes, CRUD operations, pandas analytics math, and file parsing:
 
 ```bash
 cd backend
-.\venv\Scripts\python.exe -m pytest
+.\venv\Scripts\python.exe -m pytest -v
 ```
 
-Все тесты выполняются в изолированной in-memory SQLite базе данных.
+### Test Coverage Highlights:
+- `test_health_check`: Liveness probe status verification.
+- `test_create_and_read_activity`: Full lifecycle persistence and schema compliance.
+- `test_analytics_calculation`: Vectorized pandas aggregation math (hours, $/hr, top games, monthly trends).
+- `test_csv_upload`: In-memory multipart CSV ingestion and header normalization.
+- `test_load_sample_data`: Pre-packaged dataset ingestion workflow.
 
 ---
 
-## 📁 Формат файлов для импорта
+## 📡 REST API Reference
 
-Приложение принимает файлы `.csv` и `.json`.
+Interactive documentation is automatically generated and accessible via **Swagger UI** (`/docs`) and **ReDoc** (`/redoc`).
 
-### Пример CSV (`gaming_activity.csv`):
-```csv
-title,category,platform,date,hours_played,money_spent,rating,notes
-Baldur's Gate 3,RPG,PC,2026-05-02,4.5,59.99,10.0,Bought the game! Created Wizard
-Cyberpunk 2077,RPG,PC,2026-06-01,3.5,29.99,9.5,Phantom Liberty expansion
-Counter-Strike 2,Shooter,PC,2026-07-12,1.5,0.0,8.0,Premier matches
-Elden Ring,Action RPG,PS5,2026-08-02,4.0,0.0,9.5,Messmer boss battle
+### Core Endpoints:
+
+#### `GET /api/analytics`
+Computes KPI summary statistics and visual chart data.
+- **Parameters**: `start_date`, `end_date`, `category`, `platform`, `search`
+- **Response**:
+```json
+{
+  "kpis": {
+    "total_hours": 128.5,
+    "total_spent": 284.95,
+    "avg_cost_per_hour": 2.22,
+    "total_activities": 37,
+    "unique_games": 12,
+    "top_game": "Baldur's Gate 3",
+    "top_category": "RPG",
+    "total_days_active": 32
+  },
+  "monthly_trend": [
+    { "month": "2026-05", "hours": 27.5, "spent": 144.97, "session_count": 8 },
+    { "month": "2026-06", "hours": 32.0, "spent": 39.99, "session_count": 10 }
+  ],
+  "category_distribution": [
+    { "category": "RPG", "hours": 58.2, "spent": 119.98, "percentage": 45.3 }
+  ],
+  "platform_distribution": [
+    { "platform": "PC", "hours": 94.0, "count": 26 }
+  ],
+  "top_games": [
+    { "title": "Baldur's Gate 3", "category": "RPG", "total_hours": 34.5, "total_spent": 59.99, "sessions_count": 7 }
+  ],
+  "categories_list": ["Action RPG", "Indie Roguelike", "RPG", "Shooter", "Strategy"],
+  "platforms_list": ["Nintendo Switch", "PC", "PS5", "Xbox Series X"]
+}
 ```
 
-### Пример JSON (`gaming_activity.json`):
+#### `GET /api/activities`
+Retrieves a paginated list of activity records.
+- **Parameters**: `skip` (default 0), `limit` (default 25), `search`, `category`, `platform`, `start_date`, `end_date`
+
+#### `POST /api/activities`
+Creates a single activity record manually.
+- **Payload**:
+```json
+{
+  "title": "Elden Ring: Shadow of the Erdtree",
+  "category": "Action RPG",
+  "platform": "PS5",
+  "date": "2026-10-15",
+  "hours_played": 4.5,
+  "money_spent": 39.99,
+  "rating": 9.8,
+  "notes": "Defeated Messmer after several attempts"
+}
+```
+
+#### `POST /api/upload`
+Multipart file upload accepting `.csv` or `.json` files.
+
+#### `POST /api/upload/load-sample`
+Populates the database with the included multi-month sample dataset.
+
+#### `DELETE /api/activities`
+Purges all activity records from the database.
+
+---
+
+## 📂 Data Schema Specification
+
+### CSV Format (`sample_data/gaming_activity.csv`):
+```csv
+title,category,platform,date,hours_played,money_spent,rating,notes
+Baldur's Gate 3,RPG,PC,2026-05-02,4.5,59.99,10.0,Created High Elf Wizard
+Cyberpunk 2077,RPG,PC,2026-06-01,3.5,29.99,9.5,Phantom Liberty expansion
+Counter-Strike 2,Shooter,PC,2026-07-12,1.5,0.0,8.0,Competitive matches
+```
+
+### JSON Format (`sample_data/gaming_activity.json`):
 ```json
 [
   {
@@ -191,31 +270,23 @@ Elden Ring,Action RPG,PS5,2026-08-02,4.0,0.0,9.5,Messmer boss battle
 ]
 ```
 
-> **Совет:** Вы можете нажать кнопку **«Демо данные»** в верхнем меню дашборда, чтобы мгновенно загрузить готовые реалистичные данные за несколько месяцев!
+---
+
+## 💼 Senior Engineering Highlights & Interview Talking Points
+
+1. **Vectorized Aggregation vs. Database Bottlenecks**:
+   - Rather than overloading the database with numerous complex `GROUP BY` subqueries on every filter combination, the backend executes a single indexed SQL query and uses **pandas** for high-throughput vectorized in-memory aggregations and time-series resampling.
+2. **Schema Resilience & Dialect Ingestion**:
+   - The file upload parser gracefully reconciles column variations, encoding differences, and date formats across user datasets, ensuring production reliability without throwing unexpected unhandled exceptions.
+3. **Decoupled Architecture**:
+   - Strict separation between domain logic (`analytics.py`), persistence abstractions (`crud.py`), ORM schemas (`models.py`), and contract validations (`schemas.py`).
+4. **Optimized Containerization**:
+   - Multi-stage Docker build for the React frontend, yielding an ultra-lightweight Nginx production image with gzipped static assets and integrated reverse proxying.
+5. **Observability & Diagnostics**:
+   - Built-in `/health` endpoint and PostgreSQL container healthcheck verification guaranteeing that backend workers only connect once the database is fully ready.
 
 ---
 
-## 💼 Что этот проект демонстрирует на собеседованиях:
+## 📄 License
 
-1. **FastAPI & REST API Architecture**:
-   - Чистая многослойная архитектура: `routers` -> `crud` -> `analytics` -> `database`/`models`.
-   - Использование Pydantic v2 для строгой типизации входных параметров и DTO ответов.
-   - Автодокументация OpenAPI/Swagger из коробки.
-2. **Data Processing & Pandas**:
-   - Преобразование неструктурированных файлов (CSV/JSON с разными диалектами разделителей и синонимами названий).
-   - Расчет агрегатов, скользящих метрик и временных рядов (Time-series) на pandas.
-3. **Database & SQL**:
-   - Двухуровневая поддержка: PostgreSQL (через psycopg2 в Docker) и SQLite (локально для тестов и быстрой разработки).
-   - Индексы по полям фильтрации (`date`, `category`, `platform`, `title`).
-4. **Modern Frontend & Visualization**:
-   - Красивый адаптивный интерфейс (Tailwind CSS, Glassmorphism).
-   - Интерактивные графики Chart.js с поддержкой двойных осей Y (часы и деньги).
-   - Фильтры с динамическим пересчетом без перезагрузки страниц.
-5. **DevOps & Containerization**:
-   - Multi-stage Dockerfile для фронтенда с минимизацией размера образа через Nginx.
-   - Docker Compose с healthcheck для базы данных PostgreSQL.
-
----
-
-## 📄 Лицензия
-MIT License. Проект открыт для свободного использования, модификации и добавления в личное портфолио!
+This project is licensed under the [MIT License](LICENSE).

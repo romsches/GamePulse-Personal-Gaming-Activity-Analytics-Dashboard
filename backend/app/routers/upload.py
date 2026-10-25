@@ -1,3 +1,9 @@
+"""API router for dataset file ingestion and bulk import.
+
+Handles CSV and JSON uploads, performing header normalization, type coercion,
+date parsing, and database bulk insertion.
+"""
+
 import io
 import os
 import json
@@ -18,7 +24,11 @@ SAMPLE_DATA_PATH = Path(__file__).resolve().parent.parent / "sample_data" / "gam
 
 
 def normalize_dataframe(df: pd.DataFrame) -> List[Dict[str, Any]]:
-    # Map common alternative column headers to target schema names
+    """Clean and map heterogeneous DataFrame columns to canonical schema fields.
+
+    Handles common synonyms across user datasets (e.g. 'game' -> 'title',
+    'hours' -> 'hours_played', 'genre' -> 'category', 'cost' -> 'money_spent').
+    """
     column_mapping = {
         "game": "title",
         "name": "title",
@@ -44,11 +54,11 @@ def normalize_dataframe(df: pd.DataFrame) -> List[Dict[str, Any]]:
     df.columns = [str(c).strip().lower().replace(" ", "_").replace("-", "_") for c in df.columns]
     df = df.rename(columns=column_mapping)
 
-    # Validate essential column
+    # Validate presence of title field
     if "title" not in df.columns:
-        raise ValueError("Dataset missing required column: 'title' (or 'game', 'name')")
+        raise ValueError("Dataset is missing required column: 'title' (or alias 'game', 'name')")
 
-    # Ensure required columns exist with defaults
+    # Apply defaults and type safety
     if "category" not in df.columns:
         df["category"] = "Other"
     else:
@@ -63,7 +73,6 @@ def normalize_dataframe(df: pd.DataFrame) -> List[Dict[str, Any]]:
         df["date"] = pd.Timestamp.now().date()
     else:
         df["date"] = pd.to_datetime(df["date"], errors="coerce")
-        # Replace unparseable dates with today
         df["date"] = df["date"].fillna(pd.Timestamp.now()).dt.date
 
     if "hours_played" not in df.columns:
@@ -86,7 +95,7 @@ def normalize_dataframe(df: pd.DataFrame) -> List[Dict[str, Any]]:
     else:
         df["notes"] = df["notes"].astype(str).replace({"nan": None, "None": None})
 
-    # Drop records where title is empty or null
+    # Filter out empty or whitespace-only titles
     df = df.dropna(subset=["title"])
     df["title"] = df["title"].astype(str).str.strip()
     df = df[df["title"] != ""]
@@ -110,18 +119,19 @@ def normalize_dataframe(df: pd.DataFrame) -> List[Dict[str, Any]]:
     return records
 
 
-@router.post("", response_model=UploadResponse)
+@router.post("", response_model=UploadResponse, summary="Upload and ingest CSV or JSON dataset")
 async def upload_file(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
+    """Ingest a CSV or JSON file containing historical gaming activity logs."""
     filename = file.filename or "unknown"
     ext = os.path.splitext(filename)[1].lower()
 
     if ext not in [".csv", ".json"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unsupported file format. Please upload a .csv or .json file."
+            detail="Unsupported file format. Please upload a valid .csv or .json file."
         )
 
     content = await file.read()
@@ -172,8 +182,9 @@ async def upload_file(
         )
 
 
-@router.post("/load-sample", response_model=UploadResponse)
+@router.post("/load-sample", response_model=UploadResponse, summary="Populate dashboard with sample dataset")
 def load_sample_dataset(db: Session = Depends(get_db)):
+    """Seed the database with pre-packaged realistic gaming activity records."""
     if not SAMPLE_DATA_PATH.exists():
         raise HTTPException(status_code=404, detail="Sample dataset file not found on server.")
 

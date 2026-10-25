@@ -1,3 +1,5 @@
+"""API router for aggregated analytics metrics and visualization datasets."""
+
 from datetime import date
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
@@ -10,15 +12,16 @@ from app.analytics import get_dashboard_analytics
 router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 
 
-@router.get("", response_model=AnalyticsDashboard)
+@router.get("", response_model=AnalyticsDashboard, summary="Calculate aggregated dashboard analytics")
 def get_analytics(
-    start_date: Optional[date] = Query(None, description="Filter activities after this date"),
-    end_date: Optional[date] = Query(None, description="Filter activities before this date"),
-    category: Optional[str] = Query(None, description="Filter by category or 'all'"),
-    platform: Optional[str] = Query(None, description="Filter by platform or 'all'"),
-    search: Optional[str] = Query(None, description="Search keyword in title"),
+    start_date: Optional[date] = Query(None, description="Include activities on or after this date"),
+    end_date: Optional[date] = Query(None, description="Include activities on or before this date"),
+    category: Optional[str] = Query(None, description="Filter by genre/category name or 'all'"),
+    platform: Optional[str] = Query(None, description="Filter by hardware platform or 'all'"),
+    search: Optional[str] = Query(None, description="Search keyword contained within game title"),
     db: Session = Depends(get_db)
 ):
+    """Compute high-level KPIs, monthly time-series, and categorical distributions."""
     return get_dashboard_analytics(
         db=db,
         start_date=start_date,

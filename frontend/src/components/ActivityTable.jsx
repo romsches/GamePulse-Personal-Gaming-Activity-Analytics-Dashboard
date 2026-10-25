@@ -1,6 +1,18 @@
 import React from 'react';
 import { Star, Trash2, ChevronLeft, ChevronRight, ListOrdered } from 'lucide-react';
 
+/**
+ * Tabular Activity Journal.
+ *
+ * Displays individual gaming sessions with:
+ * - Session date & title
+ * - Stylized genre tag
+ * - Hardware platform
+ * - Duration & financial expenditure
+ * - User enjoyment rating
+ * - User notes
+ * - Row deletion trigger and server-side pagination controls
+ */
 export default function ActivityTable({
   activities,
   total,
@@ -40,10 +52,10 @@ export default function ActivityTable({
           <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400">
             <ListOrdered className="w-4 h-4" />
           </div>
-          <h3 className="text-base font-semibold text-white">Журнал активности</h3>
+          <h3 className="text-base font-semibold text-white">Activity Journal</h3>
         </div>
         <span className="text-xs text-slate-400">
-          Всего записей: <strong className="text-white">{total}</strong>
+          Total Records: <strong className="text-white">{total}</strong>
         </span>
       </div>
 
@@ -52,15 +64,15 @@ export default function ActivityTable({
         <table className="w-full text-left text-sm text-slate-300">
           <thead className="bg-slate-800/60 text-xs uppercase text-slate-400 border-b border-slate-700/60">
             <tr>
-              <th scope="col" className="px-4 py-3 rounded-l-lg">Дата</th>
-              <th scope="col" className="px-4 py-3">Игра / Активность</th>
-              <th scope="col" className="px-4 py-3">Жанр</th>
-              <th scope="col" className="px-4 py-3">Платформа</th>
-              <th scope="col" className="px-4 py-3 text-right">Время</th>
-              <th scope="col" className="px-4 py-3 text-right">Расходы</th>
-              <th scope="col" className="px-4 py-3 text-center">Оценка</th>
-              <th scope="col" className="px-4 py-3">Заметки</th>
-              <th scope="col" className="px-4 py-3 text-center rounded-r-lg">Действия</th>
+              <th scope="col" className="px-4 py-3 rounded-l-lg">Date</th>
+              <th scope="col" className="px-4 py-3">Title / Activity</th>
+              <th scope="col" className="px-4 py-3">Genre</th>
+              <th scope="col" className="px-4 py-3">Platform</th>
+              <th scope="col" className="px-4 py-3 text-right">Duration</th>
+              <th scope="col" className="px-4 py-3 text-right">Cost</th>
+              <th scope="col" className="px-4 py-3 text-center">Score</th>
+              <th scope="col" className="px-4 py-3">Notes</th>
+              <th scope="col" className="px-4 py-3 text-center rounded-r-lg">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
@@ -86,7 +98,7 @@ export default function ActivityTable({
                     {item.platform}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-right font-semibold text-indigo-400">
-                    {item.hours_played} ч.
+                    {item.hours_played} hrs
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-right text-xs">
                     {item.money_spent > 0 ? (
@@ -114,7 +126,7 @@ export default function ActivityTable({
                     <button
                       onClick={() => onDelete(item.id)}
                       className="p-1 text-slate-500 hover:text-red-400 hover:bg-red-950/40 rounded transition"
-                      title="Удалить запись"
+                      title="Delete activity record"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -124,7 +136,7 @@ export default function ActivityTable({
             ) : (
               <tr>
                 <td colSpan="9" className="px-4 py-8 text-center text-slate-500 text-sm">
-                  Записей не найдено. Загрузите файл или добавьте активность вручную.
+                  No activity records found. Upload a dataset or add a session manually.
                 </td>
               </tr>
             )}
@@ -132,11 +144,11 @@ export default function ActivityTable({
         </table>
       </div>
 
-      {/* Pagination Bar */}
+      {/* Pagination Controls */}
       {total > 0 && (
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-800 text-xs text-slate-400">
           <div>
-            Показаны {skip + 1}–{Math.min(skip + limit, total)} из {total}
+            Showing {skip + 1}–{Math.min(skip + limit, total)} of {total}
           </div>
           <div className="flex items-center space-x-2">
             <button
@@ -147,7 +159,7 @@ export default function ActivityTable({
               <ChevronLeft className="w-4 h-4" />
             </button>
             <span className="px-2">
-              Страница {currentPage} из {totalPages}
+              Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => onPageChange(skip + limit)}

@@ -1,8 +1,16 @@
+"""Analytical engine module.
+
+Combines SQL filtering with vectorized pandas data transformations to compute:
+- Aggregate Key Performance Indicators (KPIs)
+- Time-series monthly trends (playtime vs. expenditure)
+- Categorical and platform share distributions
+- Ranked game performance metrics
+"""
+
 from datetime import date
-from typing import Optional, List, Dict, Any
+from typing import Optional
 import pandas as pd
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 
 from app.models import Activity
 from app.schemas import (
@@ -23,7 +31,20 @@ def get_dashboard_analytics(
     platform: Optional[str] = None,
     search: Optional[str] = None
 ) -> AnalyticsDashboard:
-    # 1. Fetch available categories & platforms across the whole DB for dropdown filters
+    """Compute and return aggregated analytics for the specified filter scope.
+
+    Args:
+        db: SQLAlchemy database session.
+        start_date: Optional lower date boundary.
+        end_date: Optional upper date boundary.
+        category: Genre/category filter ('all' to ignore).
+        platform: Hardware platform filter ('all' to ignore).
+        search: Case-insensitive search substring for game title.
+
+    Returns:
+        AnalyticsDashboard containing KPIs, time-series, and distributions.
+    """
+    # 1. Query distinct categories and platforms across the entire catalog for UI dropdowns
     all_categories = [
         r[0] for r in db.query(Activity.category).distinct().filter(Activity.category.isnot(None)).all()
     ]
@@ -44,7 +65,7 @@ def get_dashboard_analytics(
     )
 
     if search:
-        query = query.filter(Activity.title.ilike(f"%{search}%"))
+        query = query.filter(Activity.title.ilike(f"%{search.strip()}%"))
     if category and category != "all":
         query = query.filter(Activity.category == category)
     if platform and platform != "all":
@@ -56,7 +77,7 @@ def get_dashboard_analytics(
 
     records = query.all()
 
-    # Empty State fallback
+    # Empty State fallback when no records match filter criteria
     if not records:
         return AnalyticsDashboard(
             kpis=DashboardKpis(
@@ -77,7 +98,7 @@ def get_dashboard_analytics(
             platforms_list=sorted(all_platforms)
         )
 
-    # 3. Load into pandas DataFrame for analytical data transformations
+    # 3. Vectorized transformations with pandas DataFrame
     df = pd.DataFrame([
         {
             "id": r.id,
@@ -92,7 +113,7 @@ def get_dashboard_analytics(
         for r in records
     ])
 
-    # KPI Calculations
+    # Core KPI Computations
     total_hours = round(float(df["hours_played"].sum()), 2)
     total_spent = round(float(df["money_spent"].sum()), 2)
     avg_cost_per_hour = round(total_spent / total_hours, 2) if total_hours > 0 else 0.0
@@ -100,11 +121,10 @@ def get_dashboard_analytics(
     unique_games = int(df["title"].nunique())
     total_days_active = int(df["date"].dt.date.nunique())
 
-    # Top Game by hours
+    # Identify top title and genre by cumulative hours
     game_hours = df.groupby("title")["hours_played"].sum()
     top_game = str(game_hours.idxmax()) if not game_hours.empty else None
 
-    # Top Category by hours
     cat_hours = df.groupby("category")["hours_played"].sum()
     top_category = str(cat_hours.idxmax()) if not cat_hours.empty else None
 
@@ -119,7 +139,7 @@ def get_dashboard_analytics(
         total_days_active=total_days_active
     )
 
-    # Monthly Trend (Time Series Aggregation)
+    # Monthly Time-Series Trend
     df["month"] = df["date"].dt.strftime("%Y-%m")
     monthly_df = df.groupby("month").agg(
         hours=("hours_played", "sum"),
@@ -137,7 +157,7 @@ def get_dashboard_analytics(
         for _, row in monthly_df.iterrows()
     ]
 
-    # Category Distribution
+    # Category / Genre Distribution
     cat_df = df.groupby("category").agg(
         hours=("hours_played", "sum"),
         spent=("money_spent", "sum")
@@ -156,7 +176,7 @@ def get_dashboard_analytics(
             )
         )
 
-    # Platform Distribution
+    # Hardware Platform Distribution
     plat_df = df.groupby("platform").agg(
         hours=("hours_played", "sum"),
         count=("id", "count")
@@ -171,7 +191,7 @@ def get_dashboard_analytics(
         for _, row in plat_df.iterrows()
     ]
 
-    # Top Games (Top 10)
+    # Top 10 Game Titles by Playtime
     top_games_df = df.groupby("title").agg(
         category=("category", "first"),
         total_hours=("hours_played", "sum"),

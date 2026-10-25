@@ -1,8 +1,16 @@
+"""Database connection engine and session management.
+
+Configures SQLAlchemy declarative base and connection pools.
+Ensures thread safety when running SQLite locally, and robust pooling
+via pool_pre_ping for production PostgreSQL connections.
+"""
+
+from typing import Generator
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from app.config import settings
 
-# Handle SQLite specific connection argument
+# Configure dialect-specific connection arguments
 connect_args = {}
 if settings.DATABASE_URL.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
@@ -13,12 +21,20 @@ engine = create_engine(
     pool_pre_ping=True
 )
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
 
 Base = declarative_base()
 
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
+    """FastAPI dependency yielding an isolated SQLAlchemy session.
+
+    Guarantees session teardown and return to pool upon request completion.
+    """
     db = SessionLocal()
     try:
         yield db
