@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Black Myth: Wukong",
+    "category": "Action RPG",
+    "platform": "PC",
+    "date": "2026-08-20",
+    "hours_played": 4.5,
+    "money_spent": 59.99,
+    "rating": 9.6,
+    "notes": "Chapter 1 Black Wind Mountain completed"
+  },
+  {
+    "title": "Black Myth: Wukong",
+    "category": "Action RPG",
+    "platform": "PC",
+    "date": "2026-08-22",
+    "hours_played": 5.0,
+    "money_spent": 0.0,
+    "rating": 9.5,
+    "notes": "Yellow Wind Sage defeated"
+  },
+  {
+    "title": "Diablo IV: Vessel of Hatred",
+    "category": "ARPG",
+    "platform": "PC",
+    "date": "2026-10-08",
+    "hours_played": 6.0,
+    "money_spent": 39.99,
+    "rating": 8.8,
+    "notes": "Spiritborn class campaign playthrough"
+  },
+  {
+    "title": "Silent Hill 2 Remake",
+    "category": "Horror",
+    "platform": "PS5",
+    "date": "2026-10-15",
+    "hours_played": 3.5,
+    "money_spent": 69.99,
+    "rating": 9.2,
+    "notes": "Atmospheric exploration of Brookhaven Hospital"
+  },
+  {
+    "title": "Astro Bot",
+    "category": "Platformer",
+    "platform": "PS5",
+    "date": "2026-09-06",
+    "hours_played": 4.0,
+    "money_spent": 59.99,
+    "rating": 9.9,
+    "notes": "Pure joy and creative level design"
+  }
+]
